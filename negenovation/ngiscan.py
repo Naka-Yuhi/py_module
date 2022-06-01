@@ -7,7 +7,7 @@ from natsort import natsorted
 from tqdm.notebook import trange
 import gc
 
-def readtxt(path,fileform='data',flag_deb=0):
+def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000):
 	""" ==  readtxt  ==========
 	
 	"""
@@ -56,7 +56,7 @@ def readtxt(path,fileform='data',flag_deb=0):
 			#the first tool length is supposed to 0
 			if counter_base == 0:
 				time_len.append(0)
-				all_data = np.zeros([1000000,data_np.shape[1]+1])
+				all_data = np.zeros([allocation_size,data_np.shape[1]+1])
 			else:
 				###
 				time_len.append( time_len[counter_base-1] + data_np.shape[0]*0.25/3600 )
