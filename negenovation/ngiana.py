@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import copy
 from natsort import natsorted
+import tqdm
 
 import py_module.negenovation as ngi
 
@@ -86,19 +87,22 @@ def myFFT(data,T,split_rate=0.05,overrap=0.5,window_F="hanning"):
 def getFFTMap( data_list,T,time):
 	data_size = len(data_list)
 
-	for i,acc_data in enumerate(data_list):
+	for i in tqdm.tqdm(range(data_size)):
+		acc_data = data_list[i]
+
+		fft_x = myFFT(acc_data[:,0],T)
+		fft_y = myFFT(acc_data[:,1],T)
+		fft_z = myFFT(acc_data[:,2],T)
 		
-		fft_x = myFFT(acc_data[0],T)
-		fft_y = myFFT(acc_data[1],T)
-		fft_z = myFFT(acc_data[2],T)
+		#print("%d/%d" %( i,data_size))
 
 		if i == 0:
-			fft_map = np.empty(fft_x.shape[0],data_size,3)
+			fft_map = np.empty((fft_x.shape[0],data_size,3))
 			freq = fft_x[:,0]
 		
 		fft_map[:,i,0] = fft_x[:,1]
-		fft_map[:,i,1] = fft_x[:,1]
-		fft_map[:,i,2] = fft_x[:,1]
+		fft_map[:,i,1] = fft_y[:,1]
+		fft_map[:,i,2] = fft_z[:,1]
 
 	return fft_map,freq,time
 
