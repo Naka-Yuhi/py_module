@@ -13,7 +13,7 @@ import py_module.negenovation as ngi
 #				myFFT
 #
 #############################################################################
-def myFFT(data,T,split_rate,overrap,window_F="hanning"):
+def myFFT(data,T,split_rate=0.05,overrap=0.5,window_F="hanning"):
 	"""
 	
 	
@@ -83,6 +83,24 @@ def myFFT(data,T,split_rate,overrap,window_F="hanning"):
 
 	return return_fft_data
 
+def getFFTMap( data_list,T,time):
+	data_size = len(data_list)
+
+	for i,acc_data in enumerate(data_list):
+		
+		fft_x = myFFT(acc_data[0],T)
+		fft_y = myFFT(acc_data[1],T)
+		fft_z = myFFT(acc_data[2],T)
+
+		if i == 0:
+			fft_map = np.empty(fft_x.shape[0],data_size,3)
+			freq = fft_x[:,0]
+		
+		fft_map[:,i,0] = fft_x[:,1]
+		fft_map[:,i,1] = fft_x[:,1]
+		fft_map[:,i,2] = fft_x[:,1]
+
+	return fft_map,freq,time
 
 #############################################################################
 #
