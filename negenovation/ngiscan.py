@@ -7,7 +7,7 @@ from natsort import natsorted
 from tqdm.notebook import trange
 import gc
 
-def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000):
+def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000,type_data='each'):
 	""" ==  readtxt  ==========
 	
 	"""
@@ -56,12 +56,21 @@ def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000):
 			#the first tool length is supposed to 0
 			if counter_base == 0:
 				time_len.append(0)
-				all_data = np.zeros([allocation_size,data_np.shape[1]+1])
+				
+				if type_data == 'each':
+					new_all_data = []
+				elif type_data == 'combine':
+					all_data = np.zeros([allocation_size,data_np.shape[1]+1])
 			else:
 				###
 				time_len.append( time_len[counter_base-1] + data_np.shape[0]*0.25/3600 )
 			
-			all_data[indx_start:indx_end,1:] = data_np
+			if type_data == 'each':
+				time = np.arange(indx_start,indx_end)*0.25/3600
+				new_all_data.append(   np.hstack( (time.reshape(time.shape[0],1) ,data_np) ) )
+			elif type_data == 'combine':		
+				all_data[indx_start:indx_end,1:] = data_np
+				all_data[indx_start:indx_end,0] = np.arange(indx_start,indx_end)*0.25/3600
 			#print("S: %d, E: %d" % (indx_start, indx_end ) )
 			
 			indx_start = indx_end
@@ -69,11 +78,12 @@ def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000):
 			counter_base += 1
 
 		fig_title.append( str( round(time_len[-1],1) ) + "h" )
-	#adjustment of all_data
-	logi = all_data[:,4] != 0
-	new_all_data = all_data[logi,:]
-	#print(new_all_data.shape[0])
-	new_all_data[:,0] = np.arange(0,new_all_data.shape[0]) * (0.25/3600)
+
+	if type_data == 'combine':
+		#adjustment of all_data
+		logi = all_data[:,4] != 0
+		new_all_data = all_data[logi,:]
+	
 	
 	new_length = np.vstack([np.array(time_len), np.array(length),np.array(length) - np.array(length)[0]]).T
 	new_length[:,2] *= 1000
