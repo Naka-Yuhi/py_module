@@ -53,7 +53,7 @@ def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000,type_data='ea
 			indx_end += data_np.shape[0]
 			
 			
-			#the first tool length is supposed to 0
+			#the first tool length is decided to be 0
 			if counter_base == 0:
 				time_len.append(0)
 				
@@ -89,8 +89,90 @@ def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000,type_data='ea
 	new_length[:,2] *= 1000
 	
 	return (new_all_data, new_length, fig_title)
-	
 
+def readtxt2(path,fileform='data',data_offset=5,return_type='each'):
+	""" ==  readtxt  ==========
+	
+	"""
+
+	folders = __findpath(path,fileform,'txt')
+
+	if len(folders) == 0:
+		return (None,None,None)
+
+	#the variable of path replesent the parent's path
+	
+	length = []
+	time_len = []
+	
+	
+	indx_start = 0
+	indx_end = 0
+	counter_base = 0
+	
+	fig_title = ["0h"]
+	new_all_data = []
+		
+	for data_folder in folders:
+		files_txt = natsorted(glob.glob(  os.path.join( data_folder, fileform + "*" + '.txt')   ))
+		# reading all the files
+		#length : tool length
+		#time_len : time for tool length
+		#data_np
+		
+		
+		#print("---------------------------")
+		#print(data_folder)
+		for i,file in enumerate(files_txt):
+		
+			
+			f = open(file,'r',encoding="utf-8")
+			f.readline()[:-1]
+			length.append( int( f.readline()[:-1] )/10000 )
+			f.close()
+			data_np = np.loadtxt(file,delimiter=',',skiprows=2)
+			
+			indx_end += data_np.shape[0]
+
+			time = np.arange(indx_start,indx_end)*0.25/3600
+
+
+			if counter_base == 0:
+				time_len.append(0)
+			else:
+				time_len.append(time[-1])
+			
+
+
+			##applying offset
+			time = time[data_offset-1:-data_offset]
+			data_np = data_np[data_offset-1:-data_offset]
+			data = np.hstack( (time.reshape(time.shape[0],1) ,data_np) )
+
+			##add data into new_all_data
+			new_all_data.append( data )
+			if counter_base == 0:
+				data_combined = data
+			else:
+				data_combined = np.vstack(  (data_combined,data) )
+			counter_base += 1
+
+			indx_start = indx_end
+			
+	fig_title.append( str( round(time_len[-1],1) ) + "h" )
+	
+	
+	new_length = np.vstack([np.array(time_len), np.array(length),np.array(length) - np.array(length)[0]]).T
+	new_length[:,2] *= 1000
+
+
+	if return_type == 'each':
+		return (new_all_data, new_length, fig_title)	
+	if return_type == 'combine':
+		return (data_combined,new_length,fig_title)
+	else:
+		return( None, new_length, fig_title)
+	
 def readNPY( path,fileform='data'):
 	""" ==  readNPY  ==========
 	
