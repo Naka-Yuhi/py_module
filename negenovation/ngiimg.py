@@ -6,6 +6,18 @@ from PIL import Image
 import os
 import glob
 from natsort import natsorted
+from enum import Enum
+
+class ProcessType(Enum):
+
+	#Li part 00~19
+	pattern00 = "Li-X-UD"	
+	pattern01 = "Li-Y-UD"
+	pattern02 = "Li-XY-UD"
+	
+	#Lo part 20 ~ 39
+	pattern20 = "Lo-S-U"
+	pattern21 = "Lo-S-D"
 
 def show_images(images,title_str, columns = 3):
 	
@@ -110,4 +122,19 @@ def getIMG(path):
 	
 	return (img_work,img_tool_side,img_tool_frontS,img_tool_frontL,img_tool_naname)
 	
+def show_pattern_img(config):
+	pattern = config['condition']['process_type']
+
+	try:
+		process_type = ProcessType(pattern)
+	except ValueError as e:
+		print(e)
+		return
+	
+	process_type_str =  str( process_type ).split(".")
+	filename = process_type_str[1] + ".jpg"
+
+	pattern_img = Image.open("./py_module/image/machining_pattern/" + filename )
+	show_images([pattern_img],"Pattern",1)
+
 	

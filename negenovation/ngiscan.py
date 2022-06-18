@@ -6,6 +6,8 @@ import copy
 from natsort import natsorted
 from tqdm.notebook import trange
 import gc
+import yaml
+import datetime
 
 def readtxt(path,fileform='data',flag_deb=0,allocation_size=100000,type_data='each'):
 	""" ==  readtxt  ==========
@@ -239,6 +241,41 @@ def readCSV(path,fileform='data'):
 				
 	
 	return data_list
+
+def readyaml(path):
+	
+	if os.path.isfile( path ):
+		file_yml = path
+	else:
+		files_yml = natsorted(glob.glob(os.path.join(path,'*.yml') ) )
+		if len(files_yml) == 0:
+			try:
+				raise FileNotFoundError("yaml file was not found.")
+			except:
+				traceback.print_exc()
+				return
+		else:
+			file_yml = files_yml[0]
+
+	with open(file_yml,'r') as yml:
+		config = yaml.safe_load(yml)
+
+	start_time = config['condition']['date']['start'].strftime('%Y/%m/%d')
+	end_time = config['condition']['date']['end'].strftime('%Y/%m/%d')
+	print(config['condition']['Nnumber'])
+	print("================================")
+	print('加工開始日：' + start_time)
+	print('加工終了日：' + end_time)
+	print('回転数：' + str( config['condition']['rotation_speed'] ))
+	print('送り速度：' + str(config['condition']['feedrate'] ))
+	print('切り込み幅：' + str( config['condition']['ae']))
+	print('切り込み深さ：' + str(config['condition']['ap']))
+	print('加工時間：' + str( config['condition']['machining_time'] ))
+	print('加工のパターン：' + config['condition']['process_type'])
+	print('コメント：' + config['condition']['description'])
+
+	return config
+
 #####################################################
 #				Private functions					#
 #####################################################
