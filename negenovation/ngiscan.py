@@ -243,6 +243,10 @@ def readCSV(path,fileform='data'):
 	return data_list
 
 def readyaml(path):
+	'''
+
+	
+	'''
 	
 	if os.path.isfile( path ):
 		file_yml = path
