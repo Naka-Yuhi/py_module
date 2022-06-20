@@ -247,7 +247,9 @@ def readyaml(path):
 
 	
 	'''
-	
+	#latest yaml information
+	up_to_date = True
+
 	if os.path.isfile( path ):
 		file_yml = path
 	else:
@@ -264,6 +266,26 @@ def readyaml(path):
 	with open(file_yml,'r') as yml:
 		config = yaml.safe_load(yml)
 
+
+	#calculation of machining time
+	parpath = os.path.abspath( os.path.join( os.pardir ))
+	_, length,_ = readtxt2(parpath)
+
+	#a type of machining_time variable is numpy.numpy, so machining_time has to be changed into float.
+	machining_time = round(  float(length[-1,0]) ,2 )
+	
+	
+	#In case of Mechining time filled with empty or not equal to machining time calculated above
+	if config['condition']['machining_time'] is None:
+		config['condition']['machining_time'] = machining_time
+		up_to_date = False
+		#print("ok1")
+	elif config['condition']['machining_time'] != machining_time:
+		config['condition']['machining_time'] = machining_time
+		up_to_date = False
+		#print("ok2")
+
+
 	start_time = config['condition']['date']['start'].strftime('%Y/%m/%d')
 	end_time = config['condition']['date']['end'].strftime('%Y/%m/%d')
 	print(config['condition']['Nnumber'])
@@ -278,6 +300,11 @@ def readyaml(path):
 	print('加工のパターン：' + config['condition']['process_type'])
 	print('コメント：' + config['condition']['description'])
 
+	#if yaml file is not up_to_date, the following code will be carryed out
+	if not up_to_date:
+		#print("ok3")
+		with open(file_yml,'w') as yml:
+			yaml.dump(config,yml,encoding='utf-8', allow_unicode=True)
 	return config
 
 #####################################################
